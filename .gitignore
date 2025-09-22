@@ -1,0 +1,129 @@
+# ===================================
+# SimCompsWeb 项目 Git 忽略文件
+# 前后端分离架构的通用忽略规则
+# ===================================
+
+# ===== 依赖包和模块 =====
+# Node.js 依赖包目录
+node_modules/
+# pnpm 相关文件
+.pnpm-debug.log*
+pnpm-debug.log*
+# npm 相关文件
+npm-debug.log*
+# yarn 相关文件
+yarn-debug.log*
+yarn-error.log*
+# lerna 相关文件
+lerna-debug.log*
+
+# ===== 构建输出 =====
+# 通用构建目录
+dist/
+build/
+# 前端构建产物
+dist-ssr/
+# 后端编译输出
+/backEnd/dist/
+# 覆盖率报告
+coverage/
+.nyc_output/
+
+# ===== 日志文件 =====
+# 通用日志文件
+logs/
+*.log
+
+# ===== 环境变量文件 =====
+# 环境配置文件（包含敏感信息）
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===== 操作系统文件 =====
+# macOS 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+# Windows 系统文件
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+# Linux 系统文件
+*~
+
+# ===== IDE 和编辑器 =====
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+# Eclipse
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+# Visual Studio
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===== 临时文件 =====
+# 临时目录
+.temp/
+.tmp/
+# TypeScript 构建信息
+*.tsbuildinfo
+# 本地文件
+*.local
+
+# ===== 运行时文件 =====
+# 进程 ID 文件
+pids/
+*.pid
+*.seed
+*.pid.lock
+# 诊断报告
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ===== 测试相关 =====
+# 测试覆盖率
+coverage/
+.nyc_output/
+# Cypress 测试文件
+/cypress/videos/
+/cypress/screenshots/
+
+# ===== 特定框架文件 =====
+# Vue.js 相关
+.vite/
+# NestJS 相关
+.nest/
+
+# ===== 其他 =====
+# 备份文件
+*.bak
+*.backup
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
