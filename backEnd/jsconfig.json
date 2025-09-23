@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "#util/*": ["./util/*"],
+      "#router/*": ["./router/*"],
+      "#middleware/*": ["./middleware/*"],
+      "#composable/*": ["./composable/*"]
+    }
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
+}
