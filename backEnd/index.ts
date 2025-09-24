@@ -5,7 +5,6 @@ import path from "path";
 import compression from "compression";
 import apiRouter from "./routerEntry";
 import requestLogger from "#middleware/requestLog.ts";
-import { initDatabase } from "#util/database.ts";
 import { dataTableInit } from "#util/datatableInit.ts";
 
 const app: Express = express();
@@ -18,10 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(requestLogger);
 
-// 数据库链接启动
-await initDatabase();
-
-// 验证数据表
+// 初始化数据库以及数据表
 await dataTableInit();
 
 // 拦截/api的路径，指向apiRouter
