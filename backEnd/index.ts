@@ -1,11 +1,11 @@
 import express from "express";
 import type { Express } from "express";
 import cors from "cors";
-import path from "path";
 import compression from "compression";
-import apiRouter from "./routerEntry";
-import requestLogger from "#middleware/requestLog.ts";
-import { dataTableInit } from "#util/datatableInit.ts";
+import path from "path";
+import apiRouter from "@/routerEntry.ts";
+import requestLogger from "@middleware/requestLog.ts";
+import { dataTableInit } from "@util/datatableInit.ts";
 
 const app: Express = express();
 const port = 3000;

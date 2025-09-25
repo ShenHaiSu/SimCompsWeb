@@ -6,10 +6,10 @@
 
 // #region 引入
 import type { Schema } from "#composable/app/Schemas.ts";
-import fs from "fs";
-import path from "path";
-import { log2File } from "#util/tool.ts";
-import { get, initDatabase, query, run } from "#util/database.ts";
+import fs from "node:fs";
+import path from "node:path";
+import { log2File } from "@util/tool.ts";
+import { get, initDatabase, query, run } from "@util/database.ts";
 // #endregion
 
 // #region 变量常量初始化
@@ -26,10 +26,11 @@ import { get, initDatabase, query, run } from "#util/database.ts";
  */
 export const dataTableInit = async () => {
   try {
+    // 创建 schema 目录
+    fs.mkdirSync(path.resolve("schema"), { recursive: true });
+
     // 读取 schema 目录下的所有 ts 文件，获取其暴露出来的各个api
-    const fileList: string[] = await getFileList(
-      path.resolve(__dirname, "../schema")
-    );
+    const fileList: string[] = await getFileList(path.resolve("schema"));
 
     // 逐一处理
     for (const file of fileList) {
@@ -40,9 +41,7 @@ export const dataTableInit = async () => {
       if (!schema.sqliteSupport) continue;
       // 使用子函数进行处理这个模板文件
       await fileHandleFunc(schema);
-      log2File(
-        `[数据表格初始化] 处理模板文件成功 - ${schema.fileName}.${schema.tableName}`
-      );
+      log2File(`[数据表格初始化] 处理模板文件成功 - ${schema.fileName}.${schema.tableName}`);
     }
   } catch (err) {
     console.error(err);
@@ -88,8 +87,7 @@ const fileHandleFunc = async (schema: Schema): Promise<void> => {
     const tableExist = await checkTableExist(schema.fileName, schema.tableName);
 
     // 分支判断
-    if (!tableExist)
-      await createDataTable(schema.fileName, schema.tableName, schema);
+    if (!tableExist) await createDataTable(schema.fileName, schema.tableName, schema);
 
     // 执行字段类型检查
     await checkFieldType(schema.fileName, schema.tableName, schema.fields);
@@ -115,10 +113,7 @@ const fileHandleFunc = async (schema: Schema): Promise<void> => {
  * @returns {Promise<boolean>} 返回表是否存在的布尔值
  * @throws {Error} 当查询过程中发生错误时抛出异常
  */
-const checkTableExist = async (
-  fileName: string,
-  tableName: string
-): Promise<boolean> => {
+const checkTableExist = async (fileName: string, tableName: string): Promise<boolean> => {
   try {
     const sql = `select name from sqlite_master where type='table' and name= ?`;
     const result = await get(fileName, sql, [tableName]);
@@ -139,11 +134,7 @@ const checkTableExist = async (
  * @returns {Promise<void>} 无返回值的Promise
  * @throws {Error} 当创建表过程中发生错误时抛出异常
  */
-const createDataTable = async (
-  fileName: string,
-  tableName: string,
-  schema: Schema
-) => {
+const createDataTable = async (fileName: string, tableName: string, schema: Schema) => {
   try {
     const sql = `create table if not exists ${tableName} (${schema.fields
       .map((field) => `${field.name} ${field.type} ${field.other}`)
@@ -163,27 +154,15 @@ const createDataTable = async (
  * @param tableName 数据表名称
  * @param fields 字段列表
  */
-const checkFieldType = async (
-  fileName: string,
-  tableName: string,
-  fields: Schema["fields"]
-) => {
+const checkFieldType = async (fileName: string, tableName: string, fields: Schema["fields"]) => {
   try {
     const sql = `PRAGMA table_info(${tableName})`;
     const result = await query(fileName, sql);
     const fieldMap = new Map(result.map((item: any) => [item.name, item.type]));
     for (const field of fields) {
       if (fieldMap.get(field.name) !== field.type) {
-        log2File(
-          `[数据表格初始化] 字段类型不一致 - ${tableName}.${
-            field.name
-          } 期望类型: ${field.type} 实际类型: ${fieldMap.get(field.name)}`
-        );
-        throw new Error(
-          `[数据表格初始化] 字段类型不一致 - ${tableName}.${
-            field.name
-          } 期望类型: ${field.type} 实际类型: ${fieldMap.get(field.name)}`
-        );
+        log2File(`[数据表格初始化] 字段类型不一致 - ${tableName}.${field.name} 期望类型: ${field.type} 实际类型: ${fieldMap.get(field.name)}`);
+        throw new Error(`[数据表格初始化] 字段类型不一致 - ${tableName}.${field.name} 期望类型: ${field.type} 实际类型: ${fieldMap.get(field.name)}`);
       }
     }
   } catch (err) {

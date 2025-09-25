@@ -6,8 +6,8 @@
 
 // #region 引入
 import sqlite from "sqlite3";
-import fs from "fs";
-import { log2File } from "#util/tool.ts";
+import fs from "node:fs";
+import { log2File } from "@util/tool.ts";
 // #endregion
 
 // #region 变量常亮定义

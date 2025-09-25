@@ -4,7 +4,7 @@ import express from "express";
 const router = express.Router();
 
 // 引入分支路由
-import userRouter from "#router/user.ts";
+import userRouter from "@router/user.ts";
 
 // 挂载分支路由
 router.use("/user", userRouter);

@@ -11,11 +11,15 @@ export interface Schema {
   other: string;
   /** 创建索引字段的sql语句 */
   index: string[];
-  /** 创建外键依赖的sql语句 */
-  // 暂时弃用，因为sqlite不支持创建表之后新增外键依赖
-  // 如有需要，请先试用other进行添加，并且逐一ts文件在文件夹中的顺序
-  // 数据表初始化的顺序是按照字母排序
-  foreignKey: string[]; 
+  /** 创建外键依赖的sql语句。
+   * 
+   * 暂时弃用，因为sqlite不支持创建表之后新增外键依赖。
+   * 
+   * 如有需要，请先使用other进行添加，并且逐一检查ts文件在文件夹中的顺序。
+   * 
+   * 数据表初始化的顺序是按照字母排序
+   */
+  foreignKey: string[];
 }
 
 export interface Field {

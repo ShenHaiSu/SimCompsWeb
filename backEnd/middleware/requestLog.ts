@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { log2File } from "#util/tool.ts";
+import { log2File } from "@util/tool.ts";
 
 // 请求日志中间件
 const requestLogger = (req: Request, res: Response, next: NextFunction) => {

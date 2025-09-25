@@ -53,8 +53,7 @@ export const schema: Schema = {
       type: "TEXT",
       other: "not null default '[]'",
       label: "权限节点",
-      describe:
-        "用户的实际权限节点,格式为JSON字符串,例如:[{key:'link.read',value:true}]",
+      describe: "用户的实际权限节点,格式为JSON字符串,例如:[{key:'link.read',value:true}]",
     },
   ],
   other: "",

@@ -1,6 +1,6 @@
-import path from "path";
-import fs from "fs";
-import process from "process";
+import path from "node:path";
+import fs from "node:fs";
+import process from "node:process";
 
 // #region 全局变量
 // 输出队列
