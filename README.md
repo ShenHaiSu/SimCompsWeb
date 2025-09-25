@@ -16,6 +16,7 @@
 
 - TypeScript
 - Bun
+- sqlite
 
 ## 项目结构
 
