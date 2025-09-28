@@ -220,6 +220,19 @@ export class UserUtils {
 
     return { valid: true };
   }
+
+  /**
+   * 检查同一IP地址的注册用户数量
+   */
+  static async countUsersByIP(ip: string): Promise<number> {
+    try {
+      const result = await get<{ count: number }>("main.db", "SELECT COUNT(*) as count FROM user WHERE register_ip = ?", [ip]);
+      return result?.count || 0;
+    } catch (error) {
+      log2File(`查询IP ${ip} 的用户数量时出错：${error}`);
+      return 0;
+    }
+  }
 }
 
 // 导出单例实例

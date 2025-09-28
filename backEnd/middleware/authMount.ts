@@ -52,9 +52,8 @@ export const authMount = async (req: Request, res: Response, next: NextFunction)
       SessionManager.deleteSession(sessionId);
       res.clearCookie("sessionId");
 
-      res.status(401);
-      res.json({ success: false, message: "用户不存在，请重新登录", code: "USER_NOT_FOUND" });
-      return;
+      // 不中断路由，继续执行下一个中间件
+      return next();
     }
 
     // 检查用户是否被锁定
@@ -66,9 +65,8 @@ export const authMount = async (req: Request, res: Response, next: NextFunction)
       OnlineListManager.userOffline(user.id);
       res.clearCookie("sessionId");
 
-      res.status(403);
-      res.json({ success: false, message: "账户已被锁定，请联系管理员", code: "USER_LOCKED" });
-      return;
+      // 不中断路由，继续执行下一个中间件
+      return next();
     }
 
     // 将用户信息和Session信息附加到请求对象
@@ -81,7 +79,7 @@ export const authMount = async (req: Request, res: Response, next: NextFunction)
     }
 
     // 记录访问日志
-    log2File(`已认证请求: ${req.method} ${req.originalUrl} - 用户: ${user.name} (${user.id})`);
+    // log2File(`已认证请求: ${req.method} ${req.originalUrl} - 用户: ${user.name} (${user.id})`);
 
     next();
   } catch (error) {

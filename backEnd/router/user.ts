@@ -4,8 +4,8 @@ import express from "express";
 import { SessionManager } from "@composable/user/sessionManager.ts";
 import { UserUtils } from "@composable/user/userUtils.ts";
 import { onlineListManager } from "@composable/user/onlineList.ts";
-import { authMount } from "@middleware/authMount.ts";
 import { requireAuth } from "@/middleware/requireAuth";
+import { requireAdmin } from "@/middleware/requireAdmin";
 
 // 创建路由实例
 const router: Router = express.Router();
@@ -17,10 +17,9 @@ router.post("/login", async (req: Request, res: Response) => {
 
     // 验证输入
     if (!username || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "用户名和密码不能为空",
-      });
+      res.status(400);
+      res.json({ success: false, message: "用户名和密码不能为空" });
+      return;
     }
 
     // 验证用户登录
@@ -76,18 +75,102 @@ router.post("/login", async (req: Request, res: Response) => {
 // #endregion
 
 // #region 用户注册路由
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: Request, res: Response) => {
   try {
-    // TODO: 实现注册逻辑
-    res.json({ message: "注册成功" });
+    const { username, password, confirmPassword } = req.body;
+    const clientIP = req.ip || "127.0.0.1";
+
+    // 1. 基础输入验证
+    if (!username || !password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "用户名、密码和确认密码不能为空",
+      });
+    }
+
+    // 2. 密码确认验证
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "两次输入的密码不一致",
+      });
+    }
+
+    // 3. 用户名格式验证
+    const usernameValidation = UserUtils.validateUsername(username);
+    if (!usernameValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: usernameValidation.message,
+      });
+    }
+
+    // 4. 密码强度验证
+    const passwordValidation = UserUtils.validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordValidation.message,
+      });
+    }
+
+    // 5. 检查用户名是否已存在
+    const existingUser = await UserUtils.findUserByName(username);
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "用户名已存在，请选择其他用户名",
+      });
+    }
+
+    // 6. 检查同IP地址注册数量限制
+    const ipUserCount = await UserUtils.countUsersByIP(clientIP);
+    if (ipUserCount >= 2) {
+      return res.status(429).json({
+        success: false,
+        message: "同一IP地址最多只能注册2个账户",
+      });
+    }
+
+    // 7. 创建新用户
+    const newUser = await UserUtils.createUser({
+      name: username,
+      password: password,
+      register_ip: clientIP,
+      permission_rule: "user",
+      permission_node: "[]",
+    });
+
+    if (!newUser) {
+      return res.status(500).json({
+        success: false,
+        message: "用户创建失败，请稍后重试",
+      });
+    }
+
+    // 8. 返回成功响应（不包含敏感信息）
+    res.status(201).json({
+      success: true,
+      message: "注册成功",
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        register_time: newUser.register_time,
+        permission_rule: newUser.permission_rule,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ error: "注册失败" });
+    console.error("注册错误:", error);
+    res.status(500).json({
+      success: false,
+      message: "服务器内部错误，请稍后重试",
+    });
   }
 });
 // #endregion
 
 // #region 用户登出路由
-router.post("/logout", authMount, async (req: Request, res: Response) => {
+router.post("/logout", async (req: Request, res: Response) => {
   try {
     const sessionId = req.cookies.sessionId;
 
@@ -112,7 +195,7 @@ router.post("/logout", authMount, async (req: Request, res: Response) => {
 // #endregion
 
 // #region 获取用户信息路由
-router.get("/profile", requireAuth, async (req: Request, res: Response) => {
+router.get("/profile", async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -136,33 +219,27 @@ router.get("/profile", requireAuth, async (req: Request, res: Response) => {
 // #endregion
 
 // #region 更新用户信息路由
-router.put("/profile", requireAuth, async (req: Request, res: Response) => {
+router.put("/profile", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "未登录",
-      });
+      res.status(401);
+      res.json({ success: false, message: "未登录" });
+      return;
     }
 
     // TODO: 实现更新用户信息逻辑
     // 这里可以根据需要添加具体的更新逻辑
-    res.json({
-      success: true,
-      message: "更新用户信息成功",
-    });
+    res.json({ success: true, message: "更新用户信息成功" });
   } catch (error) {
     console.error("更新用户信息错误:", error);
-    res.status(500).json({
-      success: false,
-      message: "服务器内部错误",
-    });
+    res.status(500);
+    res.json({ success: false, message: "服务器内部错误" });
   }
 });
 // #endregion
 
 // #region 获取在线用户列表路由（管理员权限）
-router.get("/online", requireAuth, async (req: Request, res: Response) => {
+router.get("/online", requireAuth, requireAdmin, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "未登录" });
