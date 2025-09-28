@@ -1,5 +1,5 @@
-import express from "express";
 import type { Express } from "express";
+import express from "express";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
@@ -7,6 +7,7 @@ import path from "path";
 import apiRouter from "@/routerEntry.ts";
 import requestLogger from "@middleware/requestLog.ts";
 import { dataTableInit } from "@util/datatableInit.ts";
+import { checkFrontEndDist } from "@util/tool.ts";
 
 const app: Express = express();
 const port = 3000;
@@ -22,14 +23,22 @@ app.use(requestLogger);
 // 初始化数据库以及数据表
 await dataTableInit();
 
+// 检查前端打包路径存在性
+checkFrontEndDist();
+
 // 拦截/api的路径，指向apiRouter
 app.use("/api", apiRouter);
 
-// 使用中间件逻辑，挂载前端的静态资源
-app.use(express.static(path.join(__dirname, "../frontEndDist")));
+// 静态资源目录配置
+const staticDir = path.join(__dirname, "./frontEndDist");
 
-// 使用中间件的逻辑，将所有的请求都指向frontEndDist中的index.html
-app.use(express.static(path.join(__dirname, "../frontEndDist")));
+// 使用中间件逻辑，挂载前端的静态资源
+app.use(express.static(staticDir));
+
+// 兜底前端
+app.use((req, res) => {
+  res.sendFile(path.join(staticDir, "index.html"));
+});
 
 // 启动服务器
 app.listen(port, () => {

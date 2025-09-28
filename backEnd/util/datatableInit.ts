@@ -5,7 +5,7 @@
 // #endregion
 
 // #region 引入
-import type { Schema } from "#composable/app/Schemas.ts";
+import type { Schema } from "@composable/app/Schemas.ts";
 import fs from "node:fs";
 import path from "node:path";
 import { log2File } from "@util/tool.ts";
@@ -136,9 +136,13 @@ const checkTableExist = async (fileName: string, tableName: string): Promise<boo
  */
 const createDataTable = async (fileName: string, tableName: string, schema: Schema) => {
   try {
-    const sql = `create table if not exists ${tableName} (${schema.fields
-      .map((field) => `${field.name} ${field.type} ${field.other}`)
-      .join(",")} ${schema.other})`;
+    // 逐步拼接字段定义
+    const fieldDefs: string[] = [];
+    for (const field of schema.fields) {
+      fieldDefs.push(`${field.name} ${field.type} ${field.other}`);
+    }
+    // 拼接完整建表语句
+    const sql = `create table if not exists ${tableName} (${fieldDefs.join(",")} ${schema.other})`;
     await run(fileName, sql);
   } catch (err) {
     log2File(`[数据表格初始化] 创建数据表失败 - ${err}`);

@@ -122,3 +122,11 @@ export function log2File(...args: any[]): void {
   registerExitHooks(); // 每次调用 log2File 都尝试注册，但内部有去重
 }
 // #endregion
+
+// #region 检查前端打包文件是否存在
+export const checkFrontEndDist = () => {
+  const frontEndDist = path.join(__dirname, "../frontEndDist");
+  if (fs.existsSync(frontEndDist)) return;
+  fs.mkdirSync(frontEndDist, { recursive: true });
+};
+// #endregion
