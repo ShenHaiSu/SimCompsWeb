@@ -24,8 +24,6 @@
 SimCompsWeb/
 ├── backEnd/             # 后端服务目录
 │   ├── composable/      # 可组合函数目录
-│   ├── dbSet/           # 数据库文件目录
-│   ├── fileSet/         # 文件集合目录
 │   ├── frontEndDist/    # 前端构建产物目录
 │   ├── middleware/      # 中间件目录
 │   ├── router/          # 路由定义目录
@@ -42,7 +40,8 @@ SimCompsWeb/
     │   ├── stores/      # 状态管理
     │   ├── views/       # 页面组件
     │   ├── components/  # 可复用组件
-    │   └── assets/      # 静态资源
+    │   ├── assets/      # 静态资源
+    │   └── ...
     └── ...
 ```
 
