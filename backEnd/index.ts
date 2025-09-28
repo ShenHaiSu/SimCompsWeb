@@ -2,6 +2,7 @@ import express from "express";
 import type { Express } from "express";
 import cors from "cors";
 import compression from "compression";
+import cookieParser from "cookie-parser";
 import path from "path";
 import apiRouter from "@/routerEntry.ts";
 import requestLogger from "@middleware/requestLog.ts";
@@ -14,6 +15,7 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(compression());
 app.use(requestLogger);
 

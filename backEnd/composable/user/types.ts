@@ -46,3 +46,45 @@ export interface PermissionNode {
   value: boolean;
   describe?: string;
 }
+
+/**
+ * Session会话对象
+ */
+export interface Session {
+  sessionId: string;
+  userId: number;
+  userName: string;
+  loginTime: number;
+  lastActiveTime: number;
+  ip: string;
+  userAgent?: string;
+  expiresAt: number;
+}
+
+/**
+ * 在线用户信息
+ */
+export interface OnlineUser {
+  user: User;
+  session: Session;
+  socketId?: string; // 如果使用WebSocket
+}
+
+/**
+ * 登录请求参数
+ */
+export interface LoginRequest {
+  username: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+/**
+ * 登录响应结果
+ */
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  sessionId?: string;
+  user?: Omit<User, "password">;
+}

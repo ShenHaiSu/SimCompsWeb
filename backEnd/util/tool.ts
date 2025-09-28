@@ -9,6 +9,27 @@ let outputQueue: string[] = [];
 let outputTimer: NodeJS.Timeout | null = null;
 // 退出钩子是否已注册
 let exitHooksRegistered: boolean = false;
+// 是否正在关闭
+let isShuttingDown: boolean = false;
+// #endregion
+
+// #region 退出处理函数
+/**
+ * 应用程序退出时的处理函数，确保所有日志写入文件
+ */
+function shutdownHandler(): void {
+  if (isShuttingDown) {
+    return console.log("应用程序正在退出，日志刷新已在进行中，跳过重复调用。");
+  }
+  isShuttingDown = true;
+  console.log("应用程序正在退出，正在刷新日志...");
+  if (outputTimer) {
+    clearInterval(outputTimer);
+    outputTimer = null;
+  }
+  processQueue();
+}
+// #endregion
 // #endregion
 
 // #region 确保日志目录存在
@@ -17,9 +38,7 @@ let exitHooksRegistered: boolean = false;
  */
 function ensureLogDirectory(): void {
   const logDir = path.join(process.cwd(), "logs");
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
+  fs.mkdirSync(logDir, { recursive: true });
 }
 // #endregion
 
@@ -69,23 +88,15 @@ function initializeTimer(): void {
 function registerExitHooks(): void {
   if (exitHooksRegistered) return;
 
-  const shutdownHandler = () => {
-    if (outputTimer) {
-      clearInterval(outputTimer);
-      outputTimer = null;
-    }
-    processQueue();
-  };
-
   process.on("beforeExit", shutdownHandler);
   process.on("exit", shutdownHandler);
   process.on("SIGINT", () => {
-    console.log("Received SIGINT. Flushing logs and exiting.");
+    console.log("收到 SIGINT，正在刷新日志并退出。");
     shutdownHandler();
     process.exit(0); // 确保进程退出
   });
   process.on("uncaughtException", (err) => {
-    console.error("Uncaught Exception:", err);
+    console.error("未捕获的异常：", err);
     shutdownHandler();
     process.exit(1); // 确保进程退出并带有错误码
   });
@@ -97,8 +108,8 @@ function registerExitHooks(): void {
 // #region 导出日志写入函数
 /**
  * 将日志内容写入文件
- * 
- * ！！不要在传入之前就写时间戳！！
+ *
+ * ！！不要在传入之前写时间戳！！
  * @param args 日志内容参数列表
  */
 export function log2File(...args: any[]): void {
